@@ -44,7 +44,7 @@ def _api(method: str, path: str, user_id: str | None = None, **kwargs) -> dict:
 
     url = f"{API_BASE}{path}"
     headers = kwargs.pop("headers", {})
-    headers["X-Internal-Key"] = INTERNAL_KEY
+    headers["X-API-Key"] = INTERNAL_KEY
     if _session_user_id:
         headers["X-User-Id"] = _session_user_id
 
