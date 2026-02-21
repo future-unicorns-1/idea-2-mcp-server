@@ -10,10 +10,14 @@ Run:
 """
 
 import json
+import logging
 import os
 
 import requests
 from mcp_use.server import MCPServer
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 API_BASE = os.getenv("API_BASE_URL", "http://localhost:5000")
 INTERNAL_KEY = os.getenv("INTERNAL_SERVICE_KEY", "dev-internal-key-change-in-prod")
@@ -44,9 +48,16 @@ def _api(method: str, path: str, user_id: str | None = None, **kwargs) -> dict:
     if _session_user_id:
         headers["X-User-Id"] = _session_user_id
 
-    resp = requests.request(method, url, headers=headers, timeout=30, **kwargs)
-    resp.raise_for_status()
-    return resp.json()
+    logger.info("→ %s %s", method.upper(), url)
+    try:
+        resp = requests.request(method, url, headers=headers, timeout=30, **kwargs)
+        resp.raise_for_status()
+        logger.info("✓ %s %s — %s", method.upper(), url, resp.status_code)
+        return resp.json()
+    except requests.RequestException as exc:
+        status = getattr(exc.response, "status_code", None) if hasattr(exc, "response") else None
+        logger.error("✗ %s %s — %s (status %s)", method.upper(), url, exc, status)
+        raise
 
 
 # ==========================================
