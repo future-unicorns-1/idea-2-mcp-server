@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 API_BASE = os.getenv("API_BASE_URL", "http://localhost:5000")
-INTERNAL_KEY = os.getenv("INTERNAL_SERVICE_KEY", "dev-internal-key-change-in-prod")
+INTERNAL_KEY = os.getenv("INTERNAL_SERVICE_KEY", "dev-internal-key")
 
 server = MCPServer(
     name="AI Outbound Operator",
