@@ -154,7 +154,7 @@ def draft_message(lead_id: str, channel: str, context: str = "") -> str:
 
     Args:
         lead_id: The lead's UUID
-        channel: "email", "sms", or "call"
+        channel: "email"
         context: Context about your product/offering for personalization
     """
     result = _api("POST", "/outreach/draft", json={
@@ -183,62 +183,28 @@ def send_email(lead_id: str, subject: str, content: str) -> str:
 
 
 @server.tool()
-def send_sms(lead_id: str, content: str) -> str:
-    """Send an SMS to a lead via Twilio.
-
-    Args:
-        lead_id: The lead's UUID
-        content: SMS message (max 160 chars recommended)
-    """
-    result = _api("POST", "/outreach/send/sms", json={
-        "lead_id": lead_id,
-        "content": content,
-    })
-    return json.dumps(result, indent=2)
-
-
-@server.tool()
-def place_call(lead_id: str, script: str, callback_url: str) -> str:
-    """Place an AI-scripted phone call to a lead via Twilio.
-
-    Args:
-        lead_id: The lead's UUID
-        script: The call script to deliver
-        callback_url: URL to receive call results
-    """
-    result = _api("POST", "/outreach/send/call", json={
-        "lead_id": lead_id,
-        "script": script,
-        "callback_url": callback_url,
-    })
-    return json.dumps(result, indent=2)
-
-
-@server.tool()
 def create_sequence(
-    lead_id: str,
+    name: str,
     user_id: str,
-    channel: str = "email",
+    lead_ids: list[str],
     num_steps: int = 3,
     context: str = "",
-    auto_send: bool = False,
 ) -> str:
-    """Generate and schedule a multi-step follow-up sequence for a lead.
+    """Create a new outreach sequence with AI-personalized content for each lead.
 
     Args:
-        lead_id: The lead's UUID
+        name: Name for the sequence
         user_id: The user's UUID
-        channel: "email" or "sms"
-        num_steps: Number of follow-up steps (default 3)
-        context: Context about your offering
-        auto_send: True to auto-send, False for approval mode
+        lead_ids: List of lead UUIDs to enroll
+        num_steps: Number of follow-up steps (1-10, default 3)
+        context: Optional context about the product or messaging angle
     """
-    result = _api("POST", "/outreach/sequence", user_id=user_id, json={
-        "lead_id": lead_id,
-        "channel": channel,
+    result = _api("POST", "/sequences/create", user_id=user_id, json={
+        "name": name,
+        "lead_ids": lead_ids,
         "num_steps": num_steps,
+        "channel": "email",
         "context": context,
-        "auto_send": auto_send,
     })
     return json.dumps(result, indent=2)
 
@@ -276,7 +242,7 @@ def process_reply(lead_id: str, reply_text: str, channel: str = "email") -> str:
     Args:
         lead_id: The lead's UUID
         reply_text: The reply content
-        channel: "email", "sms", or "call"
+        channel: "email"
     """
     result = _api("POST", "/scoring/process-reply", json={
         "lead_id": lead_id,
